@@ -3,16 +3,27 @@ FROM python:3.11-alpine
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1  
 
-WORKDIR /app
+WORKDIR /opt/app
 
-RUN pip install --upgrade pip
+COPY requirements.txt .
 
-COPY requirements.txt /app/
+RUN mkdir -p /opt/app/static/ && \
+    mkdir -p /opt/app/media/ && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
-COPY . /app/
 
-EXPOSE 8000
+# RUN addgroup --gid 1001 --system app && \
+#     adduser --no-create-home \
+#     --shell /bin/false --disabled-password \
+#     --uid 1001 --system --group app && \
+#     chown -R app:app /opt/app
 
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+
+# USER app
+
+#EXPOSE 8000
+
+CMD ["sh", "entrypoint.sh"]

@@ -12,4 +12,4 @@ python manage.py createsuperuser \
     --email=$DJANGO_SUPERUSER_EMAIL \
     || true
 
-exec "$@"
+gunicorn blog_project.wsgi:application --bind $API_HOST:$API_PORT --log-level INFO

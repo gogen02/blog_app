@@ -1,17 +1,35 @@
+volumes:
+  postgres_data:
+  media:
+  static:
+
+networks:
+  API:
+    driver: bridge
+
+
 services:
   web:
     container_name: blog_app
     build: .
-      # command: python manage.py runserver 0.0.0.0:8000
     ports:
       - ${API_PORT}:${API_PORT}
+    networks:
+      - API
+    volumes:
+      - static:/opt/app/static
+      - media:/opt/app/media
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
 
   db:
     image: postgres:${POSTGRES_VERSION}
     container_name: postgres
+    networks:
+      - API
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -25,20 +43,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
   nginx:
     image: nginx:${NGINX_VERSION}
     container_name: nginx
+    networks:
+      - API
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf:ro
-      - static:/app/static
-      - media:/app/media
+      - static:/opt/app/static
+      - media:/opt/app/media
     environment:
       NGINX_SET_REAL_IP_FROM: 192.168.1.0/24
     depends_on:
-      - api
+      - web
     ports:
       - ${NGINX_PORT}:80
 
-volumes:
-  postgres_data:
