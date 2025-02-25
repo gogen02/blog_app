@@ -5,13 +5,15 @@ volumes:
 
 networks:
   API:
-    driver: host
+    driver: bridge
 
 
 services:
   web:
     container_name: blog_app
-    build: .
+    build:
+      context: .
+      network: host
     ports:
       - ${API_PORT}:${API_PORT}
     networks:
