@@ -41,6 +41,7 @@ pipeline {
                                 sshTransfer(
                                 execCommand: """
                                 cd blog_app && \\
+                                sed -i 's/\r$//' entrypoint.sh && \\
                                 docker-compose down && \\
                                 docker-compose up -d --build
                                 """
