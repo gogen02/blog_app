@@ -21,11 +21,12 @@ pipeline {
                                     excludes: '*.log, *.lock, .svn/, .git/',
                                     execCommand: """
                                     cd blog_app && \\
-                                    sed -i 's/\r$//' entrypoint.sh && \\
+                                    sed -i 's/\r\$//' entrypoint.sh && \\
                                     docker compose up -d --build --force-recreate --no-deps
                                     """
                                 ) 
                             ], 
+                            verbose: false
                             verbose: false
                         ) 
                     ])
