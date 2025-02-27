@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        ENABLE_VERBOSE = true
-    }
-
     stages {
         stage('Клонирование репозитория') {
             steps {
@@ -23,42 +19,18 @@ pipeline {
                                     remoteDirectory: "/blog_app/",
                                     cleanRemote: true, 
                                     excludes: '*.log, *.lock, .svn/, .git/',
+                                    execCommand: """
+                                    cd blog_app && \\
+                                    sed -i 's/\r$//' entrypoint.sh && \\
+                                    docker compose up -d --build --force-recreate --no-deps
+                                    """
                                 ) 
                             ], 
-                            verbose: ${ENABLE_VERBOSE}
+                            verbose: false
                         ) 
                     ])
                 }
             }
-        }
-
-        stage('Запуск Docker Compose') { 
-            steps { 
-                script { 
-                    sshPublisher(publishers: [ 
-                        sshPublisherDesc(configName: "gruzdev", 
-                            transfers: [
-                                sshTransfer(
-                                execCommand: """
-                                cd blog_app && \\
-                                sed -i 's/\r$//' entrypoint.sh && \\
-                                docker-compose down && \\
-                                docker-compose up -d --build
-                                """
-                                ) 
-                           ],
-                           verbose: ${ENABLE_VERBOSE}
-                        )
-                            
-                    ]) 
-                } 
-            } 
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline завершен!'
         }
     }
 }
